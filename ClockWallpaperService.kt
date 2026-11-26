@@ -1,5 +1,6 @@
 package com.example.clockedge
 
+import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -80,6 +81,9 @@ class ClockWallpaperService : WallpaperService() {
                 addAction(Intent.ACTION_TIME_CHANGED)
                 addAction(Intent.ACTION_TIMEZONE_CHANGED)
                 addAction(Intent.ACTION_BATTERY_CHANGED)
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_USER_PRESENT)
             }
             // Le dernier état de la batterie est renvoyé directement (broadcast "sticky").
             val sticky = registerReceiver(receiver, filter)
@@ -133,6 +137,11 @@ class ClockWallpaperService : WallpaperService() {
             val w = width.toFloat()
             val h = height.toFloat()
             canvas.drawColor(Color.BLACK)
+
+            // Écran d'accueil (téléphone déverrouillé) : fond noir uni, sans horloge.
+            // L'horloge n'apparaît que sur l'écran de verrouillage et dans l'aperçu.
+            val keyguard = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+            if (!isPreview && !keyguard.isKeyguardLocked) return
 
             // Halo bleu discret derrière les heures
             bgPaint.shader = RadialGradient(
